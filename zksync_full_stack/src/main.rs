@@ -9,6 +9,7 @@ use zksync_web3_decl::{
     namespaces::{EthNamespaceClient, ZksNamespaceClient},
 };
 use zksync_web3_rs::{
+    eip712::Eip712TransactionRequest,
     providers::{Middleware, Provider},
     signers::{LocalWallet, Signer},
     zks_provider::ZKSProvider,
@@ -80,9 +81,48 @@ async fn main() {
         .from(zk_wallet.l2_address());
 
         // Send the deployment transaction and wait until we receive the contract address.
-        let address = zk_wallet.deploy(&request).await.unwrap();
+        //let address = zk_wallet.deploy(&request).await.unwrap();
 
+        let eip712_request: Eip712TransactionRequest = request.clone().try_into().unwrap();
+        println!("{}", "Deploy".bright_magenta());
+
+        let transaction_receipt = zk_wallet
+            .get_era_provider()
+            .unwrap()
+            .clone()
+            .send_transaction_eip712(&zk_wallet.l2_wallet, eip712_request)
+            .await
+            .unwrap()
+            .await
+            .unwrap()
+            .unwrap();
+
+        // println!("{:#?}", transaction_receipt);
+        let address = transaction_receipt.contract_address.unwrap();
         println!("Contract address: {:#?}", address);
+
+        let transaction_hash_deploy = transaction_receipt.transaction_hash;
+        let transaction_hash_formatted_deploy =
+            format!("{:#?}", transaction_receipt.transaction_hash);
+        println!("transaction hash {}", transaction_hash_formatted_deploy);
+        let l2_transaction_mint = {
+            loop {
+                let l2_transaction = l2_rpc_client
+                    .get_transaction_details(transaction_hash_deploy)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                if l2_transaction.eth_commit_tx_hash.is_some() {
+                    break l2_transaction.clone();
+                }
+
+                sleep(Duration::from_secs(1)).await; // Adjust the duration as needed
+            }
+        };
+
+        let l2_tx_fee_formatted_mint = format!("{:#?}", l2_transaction_mint.fee);
+        println!("L2 fee: {}", l2_tx_fee_formatted_mint.green());
 
         address
     };
@@ -186,7 +226,7 @@ async fn main() {
                 Some(
                     [
                         "CD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826".into(),
-                        "CD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826".into(),
+                        "bBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB".into(),
                         value.into(),
                     ]
                     .into(),
