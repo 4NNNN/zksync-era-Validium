@@ -105,7 +105,7 @@ async fn main() {
         let transaction_hash_formatted_deploy =
             format!("{:#?}", transaction_receipt.transaction_hash);
         println!("transaction hash {}", transaction_hash_formatted_deploy);
-        let l2_transaction_mint = {
+        let l2_transaction_deploy = {
             loop {
                 let l2_transaction = l2_rpc_client
                     .get_transaction_details(transaction_hash_deploy)
@@ -117,12 +117,23 @@ async fn main() {
                     break l2_transaction.clone();
                 }
 
-                sleep(Duration::from_secs(1)).await; // Adjust the duration as needed
+                sleep(Duration::from_secs(1)).await;
             }
         };
 
-        let l2_tx_fee_formatted_mint = format!("{:#?}", l2_transaction_mint.fee);
-        println!("L2 fee: {}", l2_tx_fee_formatted_mint.green());
+        let l2_tx_fee_formatted_deploy = format!("{:#?}", l2_transaction_deploy.fee);
+        println!("L2 fee: {}", l2_tx_fee_formatted_deploy.green());
+        let l1_transaction = l1_rpc_client
+            .get_transaction_by_hash(l2_transaction_deploy.eth_commit_tx_hash.unwrap())
+            .await
+            .unwrap()
+            .unwrap();
+
+        let l1_transaction_gas_formatted = format!("{:#?}", l1_transaction.gas);
+        println!("L1 Gas: {}", l1_transaction_gas_formatted.yellow());
+
+        let gas_price_formatted = format!("{:#?}", l1_transaction.gas_price.unwrap());
+        println!("L1 Gas price: {}", gas_price_formatted.yellow());
 
         address
     };
@@ -195,23 +206,26 @@ async fn main() {
     let l2_tx_fee_formatted_mint = format!("{:#?}", l2_transaction_mint.fee);
     println!("L2 fee: {}", l2_tx_fee_formatted_mint.green());
 
-    let l1_transaction_mint = l1_rpc_client
+    let l1_transaction_transfer = l1_rpc_client
         .get_transaction_by_hash(l2_transaction_mint.eth_commit_tx_hash.unwrap())
         .await
         .unwrap()
         .unwrap();
 
-    let l1_max_fee_per_gas_mint = l1_transaction_mint.max_fee_per_gas.unwrap();
+    let l1_max_fee_per_gas_mint = l1_transaction_transfer.max_fee_per_gas.unwrap();
     let l1_max_fee_per_gas_formatted_mint = format!("{:#?}", l1_max_fee_per_gas_mint);
     println!(
         "L1 max fee per gas: {}",
         l1_max_fee_per_gas_formatted_mint.cyan()
     );
+    let l1_transaction_gas_formatted_mint = format!("{:#?}", l1_transaction_transfer.gas);
+    println!("L1 Gas: {}", l1_transaction_gas_formatted_mint.yellow());
+
+    let gas_price_formatted_mint = format!("{:#?}", l1_transaction_transfer.gas_price.unwrap());
+    println!("L1 Gas price: {}", gas_price_formatted_mint.yellow());
     println!();
 
-    let values: Vec<&str> = vec![
-        "1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000",
-    ];
+    let values: Vec<&str> = vec!["1000"];
 
     for &value in &values {
         println!("Transfer {}", value.bright_magenta());
@@ -275,6 +289,12 @@ async fn main() {
             "L1 max fee per gas: {}",
             l1_max_fee_per_gas_formatted_transfer.cyan()
         );
+        let l1_transaction_gas_formatted_transfer = format!("{:#?}", l1_transaction_transfer.gas);
+        println!("L1 Gas: {}", l1_transaction_gas_formatted_transfer.yellow());
+
+        let gas_price_formatted_transfer =
+            format!("{:#?}", l1_transaction_transfer.gas_price.unwrap());
+        println!("L1 Gas price: {}", gas_price_formatted_transfer.yellow());
         println!();
     }
 }
