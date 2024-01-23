@@ -11,7 +11,7 @@ import * as ethers from 'ethers';
 import { deployContract, getTestContract, scaledGasPrice, waitForNewL1Batch } from '../src/helpers';
 import { getHashedL2ToL1Msg, L1_MESSENGER, L1_MESSENGER_ADDRESS } from 'zksync-web3/build/src/utils';
 
-const SYSTEM_CONFIG = require(`${process.env.ZKSYNC_HOME}/contracts/SystemConfig.json`);
+const SYSTEM_CONFIG = require(`${process.env.ZKSYNC_HOME}/era-contracts-lambda/SystemConfig.json`);
 
 const contracts = {
     counter: getTestContract('Counter'),
@@ -355,7 +355,8 @@ function getOverheadForTransaction(
     const BATCH_OVERHEAD_L2_GAS = ethers.BigNumber.from(SYSTEM_CONFIG['BATCH_OVERHEAD_L2_GAS']);
     const L1_GAS_PER_PUBDATA_BYTE = ethers.BigNumber.from(SYSTEM_CONFIG['L1_GAS_PER_PUBDATA_BYTE']);
     const BATCH_OVERHEAD_L1_GAS = ethers.BigNumber.from(SYSTEM_CONFIG['BATCH_OVERHEAD_L1_GAS']);
-    const BATCH_OVERHEAD_PUBDATA = BATCH_OVERHEAD_L1_GAS.div(L1_GAS_PER_PUBDATA_BYTE);
+    // If L1_GAS_PER_PUBDATA_BYTE is 0, BATCH_OVERHEAD_PUBDATA must be 0
+    const BATCH_OVERHEAD_PUBDATA = SYSTEM_CONFIG['L1_GAS_PER_PUBDATA_BYTE'] > 0 ? BATCH_OVERHEAD_L1_GAS.div(L1_GAS_PER_PUBDATA_BYTE) : ethers.BigNumber.from(0);
 
     const MAX_TRANSACTIONS_IN_BATCH = ethers.BigNumber.from(SYSTEM_CONFIG['MAX_TRANSACTIONS_IN_BATCH']);
     const BOOTLOADER_TX_ENCODING_SPACE = ethers.BigNumber.from(SYSTEM_CONFIG['BOOTLOADER_TX_ENCODING_SPACE']);
