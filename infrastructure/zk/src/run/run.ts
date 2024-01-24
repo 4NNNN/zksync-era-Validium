@@ -68,7 +68,7 @@ export async function approve() {
     }
 
     await utils.spawn(
-        `yarn --silent --cwd contracts/l1-contracts deploy-erc20 approve --token-address ${address} --spender-address ${process.env.CONTRACTS_DIAMOND_PROXY_ADDR}`
+        `yarn --silent --cwd contracts/ethereum deploy-erc20 approve --token-address ${address} --spender-address ${process.env.CONTRACTS_DIAMOND_PROXY_ADDR}`
     );
 }
 
