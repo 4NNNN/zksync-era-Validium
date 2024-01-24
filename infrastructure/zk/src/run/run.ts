@@ -27,7 +27,7 @@ export async function deployERC20(
             destinationFile = args[args.indexOf('--envFile') + 1];
             args.splice(args.indexOf('--envFile'), 2);
         }
-        await utils.spawn(`yarn --silent --cwd contracts/l1-contracts deploy-erc20 add-multi '
+        await utils.spawn(`yarn --silent --cwd contracts/ethereum deploy-erc20 add-multi '
             [
                 { "name": "DAI",  "symbol": "DAI",  "decimals": 18 },
                 { "name": "wBTC", "symbol": "wBTC", "decimals":  8, "implementation": "RevertTransferERC20" },
@@ -51,7 +51,7 @@ export async function deployERC20(
     } else if (command == 'new') {
         let destinationFile = 'native_erc20';
         await utils.spawn(
-            `yarn --silent --cwd contracts/l1-contracts deploy-erc20 add --token-name ${name} --symbol ${symbol} --decimals ${decimals} > ./etc/tokens/${destinationFile}.json`
+            `yarn --silent --cwd contracts/ethereum deploy-erc20 add --token-name ${name} --symbol ${symbol} --decimals ${decimals} > ./etc/tokens/${destinationFile}.json`
         );
     }
 }

@@ -5,12 +5,11 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "contracts",
-      "contracts/l1-contracts",
-      "contracts/l2-contracts",
-      "contracts/system-contracts",
+      "contracts/ethereum",
+      "contracts/zksync",
       "etc/contracts-test-data",
       "etc/ERC20",
+      "etc/system-contracts",
       "infrastructure/zk",
       "infrastructure/local-setup-preparation",
       "core/tests/revert-test",
@@ -25,8 +24,8 @@
   },
   "scripts": {
     "local-prep": "yarn workspace local-setup-preparation",
-    "l1-contracts": "yarn workspace l1-contracts",
-    "l2-contracts": "yarn workspace l2-contracts",
+    "l1-contracts": "yarn workspace l1-zksync-contracts",
+    "l2-contracts": "yarn workspace l2-zksync-contracts",
     "revert-test": "yarn workspace revert-test",
     "upgrade-test": "yarn workspace upgrade-test",
     "ts-integration": "yarn workspace ts-integration",
