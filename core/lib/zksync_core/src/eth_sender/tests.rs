@@ -949,18 +949,7 @@ async fn skipped_l1_batch_in_the_middle() -> anyhow::Result<()> {
     _skipped_l1_batch_in_the_middle(&mut validium_tester).await
 }
 
-#[tokio::test]
-async fn test_parse_multicall_data() {
-    let connection_pool = ConnectionPool::test_pool().await;
-    let l1_batch_commit_data_generator = Arc::new(RollupModeL1BatchCommitDataGenerator {});
-    let tester = EthSenderTester::new(
-        connection_pool,
-        vec![100; 100],
-        false,
-        l1_batch_commit_data_generator.clone(),
-    )
-    .await;
-
+async fn _test_parse_multicall_data(tester: &mut EthSenderTester) {
     let original_correct_form_data = Token::Array(vec![
         Token::Tuple(vec![Token::Bool(true), Token::Bytes(vec![1u8; 32])]),
         Token::Tuple(vec![Token::Bool(true), Token::Bytes(vec![2u8; 32])]),
@@ -1036,6 +1025,26 @@ async fn test_parse_multicall_data() {
     }
 }
 
+#[tokio::test]
+async fn test_parse_multicall_data() {
+    let mut rollup_tester = EthSenderTester::new(
+        ConnectionPool::test_pool().await,
+        vec![100; 100],
+        false,
+        Arc::new(RollupModeL1BatchCommitDataGenerator {}),
+    )
+    .await;
+    let mut validium_tester = EthSenderTester::new(
+        ConnectionPool::test_pool().await,
+        vec![100; 100],
+        false,
+        Arc::new(ValidiumModeL1BatchCommitDataGenerator {}),
+    )
+    .await;
+
+    _test_parse_multicall_data(&mut rollup_tester).await;
+    _test_parse_multicall_data(&mut validium_tester).await
+}
 #[tokio::test]
 async fn get_multicall_data() {
     let connection_pool = ConnectionPool::test_pool().await;
